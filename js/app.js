@@ -52,6 +52,13 @@ const App = {
       if (href === page) {
         item.classList.add('active');
       }
+      // Close mobile menu on nav click
+      item.addEventListener('click', () => {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (sidebar) sidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
+      });
     });
   },
 
@@ -59,9 +66,17 @@ const App = {
   initMobileMenu() {
     const toggle = document.getElementById('mobileMenuToggle');
     const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
     if (toggle && sidebar) {
       toggle.addEventListener('click', () => {
         sidebar.classList.toggle('open');
+        if (overlay) overlay.classList.toggle('active');
+      });
+    }
+    if (overlay) {
+      overlay.addEventListener('click', () => {
+        sidebar?.classList.remove('open');
+        overlay.classList.remove('active');
       });
     }
   },
