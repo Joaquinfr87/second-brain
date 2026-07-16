@@ -552,6 +552,8 @@ textarea {
   position: relative;
   z-index: 1;
   padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
 }
 
 .page-header {
@@ -1042,7 +1044,8 @@ textarea {
   display: grid;
   grid-template-columns: 1fr 340px;
   gap: 20px;
-  height: calc(100vh - 120px);
+  flex: 1;
+  min-height: 0;
 }
 
 .graph-canvas {
