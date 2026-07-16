@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Second Brain Visual - Detalle</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="bi bi-braces-asterisk"></i></div>
+      <h1>Second Brain</h1>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="nav-item"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+      <a href="graph.html" class="nav-item"><i class="bi bi-diagram-3"></i> Grafo de Conocimiento</a>
+      <a href="search.html" class="nav-item"><i class="bi bi-search"></i> Búsqueda Semántica</a>
+      <div class="sidebar-section" style="margin-top:1rem;">Contenido</div>
+      <a href="dashboard.html" class="nav-item"><i class="bi bi-cloud-arrow-up"></i> Subir Archivo</a>
+      <a href="#" class="nav-item"><i class="bi bi-file-earmark-text"></i> Mis Notas</a>
+      <a href="#" class="nav-item"><i class="bi bi-bookmark"></i> Guardados</a>
+      <div class="sidebar-section" style="margin-top:1rem;">Sistema</div>
+      <a href="#" class="nav-item"><i class="bi bi-gear"></i> Configuración</a>
+      <a href="#" class="nav-item" onclick="App.handleLogout();return false;"><i class="bi bi-box-arrow-left"></i> Cerrar Sesión</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar">CM</div>
+        <div class="user-info">
+          <div class="user-name">Carlos Mendoza</div>
+          <div class="user-email">carlos@universidad.edu</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <button id="mobileMenuToggle" class="btn-icon" style="display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:var(--bg-tertiary);border:1px solid var(--border);"><i class="bi bi-list"></i></button>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Back button -->
+    <a href="graph.html" class="detail-back btn btn-ghost btn-sm" style="margin-bottom:1.5rem;display:inline-flex;">
+      <i class="bi bi-arrow-left"></i> Volver al grafo
+    </a>
+
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem;" id="detailGrid">
+      <!-- Main Detail Card -->
+      <div class="detail-card glass" style="padding:2rem;" id="detailCard">
+        <!-- Populated by JS -->
+        <div style="text-align:center;padding:3rem;">
+          <i class="bi bi-hourglass-split" style="font-size:2rem;color:var(--text-muted);"></i>
+          <p style="color:var(--text-secondary);margin-top:0.5rem;">Cargando...</p>
+        </div>
+      </div>
+
+      <!-- Sidebar Panel -->
+      <div style="display:flex;flex-direction:column;gap:1rem;" id="detailSidebar">
+        <!-- Mini Connections -->
+        <div class="glass" style="padding:1.5rem;" id="connectionsPanel">
+          <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+            <i class="bi bi-link-45deg" style="color:var(--accent);"></i> Conexiones
+          </h4>
+          <div id="connectionsList">
+            <p style="font-size:0.825rem;color:var(--text-muted);">Cargando conexiones...</p>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="glass" style="padding:1.5rem;" id="tagsPanel">
+          <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+            <i class="bi bi-tags" style="color:var(--accent);"></i> Etiquetas
+          </h4>
+          <div id="tagsList" style="display:flex;flex-wrap:wrap;gap:0.4rem;"></div>
+        </div>
+
+        <!-- Meta -->
+        <div class="glass" style="padding:1.5rem;" id="metaPanel">
+          <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+            <i class="bi bi-info-circle" style="color:var(--accent);"></i> Información
+          </h4>
+          <div id="metaInfo"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .detail-card { animation: fadeIn 0.4s var(--ease-decel) both; }
+    .connection-card { transition: all var(--transition-fast); cursor: pointer; }
+    .connection-card:hover { background: var(--surface-hover); border-color: var(--border-hover); transform: translateX(4px); }
+    @media (max-width: 1024px) {
+      #detailGrid { grid-template-columns: 1fr !important; }
+    }
+  </style>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const nodeId = params.get('node');
+
+      if (!nodeId) {
+        document.getElementById('detailCard').innerHTML = `
+          <div style="text-align:center;padding:3rem;">
+            <i class="bi bi-question-circle" style="font-size:2rem;color:var(--text-muted);"></i>
+            <p style="color:var(--text-secondary);margin-top:0.5rem;">No se especificó un nodo.</p>
+            <a href="graph.html" class="btn btn-primary btn-sm" style="margin-top:1rem;">Volver al grafo</a>
+          </div>`;
+        return;
+      }
+
+      const node = BrainData.nodes.find(n => n.id === nodeId || n.label.toLowerCase().replace(/\s+/g, '-').includes(nodeId));
+      
+      if (!node) {
+        // Try fuzzy match by searching recentFiles
+        const fileMatch = BrainData.recentFiles.find(f => f.name.toLowerCase().includes(nodeId.toLowerCase()));
+        document.getElementById('detailCard').innerHTML = `
+          <div style="text-align:center;padding:3rem;">
+            <i class="bi bi-exclamation-triangle" style="font-size:2rem;color:var(--warning);"></i>
+            <p style="color:var(--text-secondary);margin-top:0.5rem;">Nodo no encontrado: "${nodeId}"</p>
+            <a href="graph.html" class="btn btn-primary btn-sm" style="margin-top:1rem;">Volver al grafo</a>
+          </div>`;
+        return;
+      }
+
+      document.title = `Second Brain Visual - ${node.label}`;
+
+      // Color map
+      const colorMap = { note: 'var(--note-color)', pdf: 'var(--pdf-color)', email: 'var(--email-color)', recording: 'var(--recording-color)' };
+      const color = colorMap[node.type] || 'var(--accent)';
+
+      // Get connections
+      const connections = BrainData.edges
+        .filter(e => e.source === node.id || e.target === node.id)
+        .map(e => {
+          const otherId = e.source === node.id ? e.target : e.source;
+          const other = BrainData.nodes.find(n => n.id === otherId);
+          return { ...e, otherNode: other };
+        })
+        .filter(c => c.otherNode);
+
+      // Render main card
+      document.getElementById('detailCard').innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.5rem;">
+          <div style="width:56px;height:56px;border-radius:var(--radius-lg);background:${color}18;color:${color};display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">
+            <i class="bi ${App.typeIcon(node.type)}"></i>
+          </div>
+          <div>
+            <h2 style="font-size:1.4rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.25rem;">${node.label}</h2>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <span class="badge badge-${node.type}">${App.typeName(node.type)}</span>
+              <span style="font-size:0.78rem;color:var(--text-muted);"><i class="bi bi-calendar3" style="margin-right:0.25rem;"></i>${App.formatDate(node.date)}</span>
+              <span style="font-size:0.78rem;color:var(--text-muted);"><i class="bi bi-diagram-3" style="margin-right:0.25rem;"></i>${connections.length} conexiones</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:0.5rem;color:var(--text-secondary);">Descripción</h3>
+          <p style="font-size:0.9rem;line-height:1.7;color:var(--text-primary);">${node.description}</p>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:0.5rem;color:var(--text-secondary);">Contenido</h3>
+          <div style="background:var(--bg-tertiary);border-radius:var(--radius-md);padding:1.25rem;font-size:0.85rem;line-height:1.7;color:var(--text-primary);font-family:'JetBrains Mono',monospace;border:1px solid var(--border);">
+            ${node.content || 'Sin contenido disponible para este elemento.'}
+          </div>
+        </div>
+
+        <div>
+          <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:0.75rem;color:var(--text-secondary);">Conexiones Relacionadas</h3>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;" id="inlineConnections"></div>
+        </div>
+      `;
+
+      // Render connections
+      const inlineConn = document.getElementById('inlineConnections');
+      const connList = document.getElementById('connectionsList');
+
+      const connHTML = connections.map(c => {
+        const oc = colorMap[c.otherNode.type] || 'var(--accent)';
+        return `
+          <div class="connection-card glass-sm" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;" onclick="window.location.href='detail.html?node=${c.otherNode.id}'">
+            <div style="width:10px;height:10px;border-radius:50%;background:${oc};flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.otherNode.label}</div>
+              <div style="font-size:0.7rem;color:var(--text-muted);">${c.label}</div>
+            </div>
+            <span class="badge badge-${c.otherNode.type}" style="font-size:0.65rem;">${App.typeName(c.otherNode.type)}</span>
+          </div>`;
+      }).join('');
+
+      if (inlineConn) inlineConn.innerHTML = connHTML || '<p style="color:var(--text-muted);font-size:0.825rem;">Sin conexiones</p>';
+      if (connList) connList.innerHTML = connHTML || '<p style="color:var(--text-muted);font-size:0.825rem;">Sin conexiones</p>';
+
+      // Render tags
+      document.getElementById('tagsList').innerHTML = node.tags.map(t => `<span class="badge badge-tag">${t}</span>`).join('');
+
+      // Render meta
+      document.getElementById('metaInfo').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:0.6rem;">
+          <div style="display:flex;justify-content:space-between;font-size:0.825rem;">
+            <span style="color:var(--text-muted);">Tipo</span>
+            <span style="font-weight:500;">${App.typeName(node.type)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.825rem;">
+            <span style="color:var(--text-muted);">Fecha</span>
+            <span style="font-weight:500;">${App.formatDate(node.date)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.825rem;">
+            <span style="color:var(--text-muted);">Conexiones</span>
+            <span style="font-weight:500;">${connections.length}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.825rem;">
+            <span style="color:var(--text-muted);">Etiquetas</span>
+            <span style="font-weight:500;">${node.tags.length}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.825rem;">
+            <span style="color:var(--text-muted);">ID</span>
+            <span style="font-weight:500;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--accent);">${node.id}</span>
+          </div>
+        </div>
+      `;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Second Brain Visual - Grafo de Conocimiento</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="bi bi-braces-asterisk"></i></div>
+      <h1>Second Brain</h1>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Principal</div>
+      <a href="dashboard.html" class="nav-item"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+      <a href="graph.html" class="nav-item active"><i class="bi bi-diagram-3"></i> Grafo de Conocimiento</a>
+      <a href="search.html" class="nav-item"><i class="bi bi-search"></i> Búsqueda Semántica</a>
+      <div class="sidebar-section" style="margin-top:1rem;">Contenido</div>
+      <a href="dashboard.html" class="nav-item"><i class="bi bi-cloud-arrow-up"></i> Subir Archivo</a>
+      <a href="#" class="nav-item"><i class="bi bi-file-earmark-text"></i> Mis Notas</a>
+      <a href="#" class="nav-item"><i class="bi bi-bookmark"></i> Guardados</a>
+      <div class="sidebar-section" style="margin-top:1rem;">Sistema</div>
+      <a href="#" class="nav-item"><i class="bi bi-gear"></i> Configuración</a>
+      <a href="#" class="nav-item" onclick="App.handleLogout();return false;"><i class="bi bi-box-arrow-left"></i> Cerrar Sesión</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar">CM</div>
+        <div class="user-info">
+          <div class="user-name">Carlos Mendoza</div>
+          <div class="user-email">carlos@universidad.edu</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <button id="mobileMenuToggle" class="btn-icon" style="display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:var(--bg-tertiary);border:1px solid var(--border);"><i class="bi bi-list"></i></button>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h2>Grafo de Conocimiento</h2>
+        <div class="subtitle">Explora las conexiones entre tus ideas</div>
+      </div>
+      <a href="search.html" class="btn btn-ghost btn-sm"><i class="bi bi-search"></i> Buscar</a>
+    </div>
+
+    <div class="graph-container">
+      <!-- Graph Canvas -->
+      <div class="graph-canvas">
+        <div id="cy"></div>
+
+        <!-- Floating Toolbar -->
+        <div class="graph-toolbar">
+          <button class="btn-icon" id="zoomIn" title="Acercar"><i class="bi bi-plus-lg"></i></button>
+          <button class="btn-icon" id="zoomOut" title="Alejar"><i class="bi bi-dash-lg"></i></button>
+          <button class="btn-icon" id="zoomFit" title="Ajustar"><i class="bi bi-arrows-fullscreen"></i></button>
+          <div style="width:1px;background:var(--border);margin:0 0.25rem;"></div>
+          <button class="btn-icon active" data-layout="cose" title="Fuerza dirigida"><i class="bi bi-diagram-3"></i></button>
+          <button class="btn-icon" data-layout="circle" title="Circular"><i class="bi bi-record-circle"></i></button>
+          <button class="btn-icon" data-layout="breadthfirst" title="Jerárquico"><i class="bi bi-sort-down"></i></button>
+          <button class="btn-icon" data-layout="concentric" title="Concéntrico"><i class="bi bi-bullseye"></i></button>
+        </div>
+      </div>
+
+      <!-- Right Panel -->
+      <div class="graph-panel">
+        <!-- Stats -->
+        <div class="panel-section">
+          <h4><i class="bi bi-bar-chart-line" style="color:var(--accent);"></i> Estadísticas</h4>
+          <div id="graphStats"></div>
+        </div>
+
+        <!-- Filters -->
+        <div class="panel-section">
+          <h4><i class="bi bi-funnel" style="color:var(--accent);"></i> Filtrar por Tipo</h4>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+            <button class="btn btn-ghost btn-sm" data-filter="note" style="font-size:0.75rem;">
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--note-color);display:inline-block;"></span> Notas
+            </button>
+            <button class="btn btn-ghost btn-sm" data-filter="pdf" style="font-size:0.75rem;">
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--pdf-color);display:inline-block;"></span> PDFs
+            </button>
+            <button class="btn btn-ghost btn-sm" data-filter="email" style="font-size:0.75rem;">
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--email-color);display:inline-block;"></span> Correos
+            </button>
+            <button class="btn btn-ghost btn-sm" data-filter="recording" style="font-size:0.75rem;">
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--recording-color);display:inline-block;"></span> Grabaciones
+            </button>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="panel-section">
+          <h4><i class="bi bi-palette" style="color:var(--accent);"></i> Leyenda</h4>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--note-color);"></div> Notas de clase</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--pdf-color);"></div> Documentos PDF</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--email-color);"></div> Correos electrónicos</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--recording-color);"></div> Grabaciones de audio</div>
+          <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);">
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.4rem;">Grosor de línea</div>
+            <div class="legend-item"><div style="width:20px;height:3px;background:var(--accent);border-radius:2px;"></div> Conexión fuerte</div>
+            <div class="legend-item"><div style="width:20px;height:1.5px;background:var(--accent);opacity:0.5;border-radius:2px;"></div> Conexión débil</div>
+            <div class="legend-item"><div style="width:20px;height:1.5px;background:var(--accent);opacity:0.3;border-radius:2px;border-top:1px dashed var(--accent);"></div> Conexión débil (dashed)</div>
+          </div>
+        </div>
+
+        <!-- Node Detail -->
+        <div id="nodeDetailPanel">
+          <div class="panel-section">
+            <h4><i class="bi bi-info-circle" style="color:var(--accent);"></i> Selecciona un nodo</h4>
+            <p style="font-size:0.825rem;color:var(--text-secondary);">Haz clic en cualquier nodo del grafo para ver sus detalles y conexiones.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <style>
+    .modal-wrapper { display: none; }
+    [data-layout].active { color: var(--accent); background: rgba(167,139,250,0.12); }
+    .graph-toolbar .btn-icon.active { color: var(--accent); background: rgba(167,139,250,0.12); }
+    [data-filter].active { color: var(--accent); background: rgba(167,139,250,0.12); border-color: var(--accent); }
+  </style>
+
+  <script src="https://unpkg.com/cytoscape@3.30.4/dist/cytoscape.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/graph.js"></script>
+</body>
+</html>
