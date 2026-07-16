@@ -43,9 +43,17 @@ header-includes:
 
 \vspace{1cm}
 
+\framebox[0.8\textwidth]{\centering \href{https://joaquinfr87.github.io/second-brain/}{\textcolor{blue}{https://joaquinfr87.github.io/second-brain/}}}
+
+\vspace{0.5cm}
+
+{\small Acceso al prototipo desplegado en GitHub Pages}
+
+\vspace{0.5cm}
+
 \framebox[0.8\textwidth]{\centering \href{https://github.com/Joaquinfr87/second-brain}{\textcolor{blue}{https://github.com/Joaquinfr87/second-brain}}}
 
-\vspace{1cm}
+\vspace{0.5cm}
 
 {\small Acceso al código fuente y documentación del proyecto}
 
