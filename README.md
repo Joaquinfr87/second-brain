@@ -29,7 +29,7 @@ Second Brain Visual es una aplicación web que convierte tus notas, correos, PDF
 - Cytoscape.js (grafo interactivo)
 - Bootstrap Icons
 - Google Fonts (Inter, JetBrains Mono)
-- Deploy: Vercel
+- Deploy: GitHub Pages
 
 ## Ejecutar localmente
 
